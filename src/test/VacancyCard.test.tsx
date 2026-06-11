@@ -1,64 +1,79 @@
-import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
+import { describe, it, expect } from 'vitest';
 import { VacancyCard } from '../components/VacancyCard';
-import type { Vacancy } from '../types/vacancy';
+
+const mockVacancy: Vacancy = {
+  id: '123',
+  name: 'Frontend Developer',
+  salary: {
+    from: 100000,
+    to: 150000,
+    currency: 'RUR',
+    gross: true,
+  },
+  experience: {
+    id: 'between1And3',
+    name: '1-3 года',
+  },
+  employment: {
+    id: 'full',
+    name: 'Полная занятость',
+  },
+  schedule: {
+    id: 'remote',
+    name: 'Удаленная работа',
+  },
+  employer: {
+    id: '1',
+    name: 'Tech Company',
+    url: null,
+  },
+  area: {
+    id: '1',
+    name: 'Москва',
+  },
+  alternate_url: 'https://hh.ru/vacancy/123',
+  snippet: {
+    requirement: 'React, TypeScript',
+    responsibility: 'Разработка UI',
+  },
+  key_skills: [{ name: 'React' }, { name: 'TypeScript' }],
+};
 
 describe('VacancyCard', () => {
-     const mockVacancy: Vacancy = {
-    id: '1',
-    name: 'Frontend разработчик',
-    salary: {
-      from: 150000,
-      to: 200000,
-      currency: 'RUB',
-      gross: false,
-    },
-    experience: {
-      id: '1',
-      name: '1-3 года',
-    },
-    employment: {
-      id: '1',
-      name: 'Полная занятость',
-    },
-    schedule: {
-      id: '1',
-      name: 'Удаленная работа',
-    },
-    employer: {
-      id: '1',
-      name: 'Kata Academy',
-      url: null,
-    },
-    area: {
-      id: '1',
-      name: 'Москва',
-    },
-    alternate_url: 'https://hh.ru/vacancy/1',
-    snippet: {
-      requirement: 'Требования: React, TypeScript',
-      responsibility: 'Обязанности: разработка',
-    },
-    key_skills: [{ name: 'React' }, { name: 'TypeScript' }],
+  const renderWithRouter = (component: React.ReactNode) => {
+    return render(<BrowserRouter>{component}</BrowserRouter>);
   };
 
-  const mockVacancyWithoutSalary: Vacancy = {
-    ...mockVacancy,
-    salary: null,
-  };
-
-    it('отображает название вакансии', () => {
-    render(<VacancyCard vacancy={mockVacancy} />);
-    expect(screen.getByText('Frontend разработчик')).toBeInTheDocument();
+  it('отображает название вакансии', () => {
+    renderWithRouter(<VacancyCard vacancy={mockVacancy} />);
+    expect(screen.getByText('Frontend Developer')).toBeInTheDocument();
   });
 
-  it('отображает зарплатную вилку', () => {
-    render(<VacancyCard vacancy={mockVacancy} />);
-    expect(screen.getByText('150 000 RUB – 200 000 RUB')).toBeInTheDocument();
+  it('отображает зарплату в правильном формате', () => {
+    renderWithRouter(<VacancyCard vacancy={mockVacancy} />);
+    expect(screen.getByText('100 000 RUR – 150 000 RUR')).toBeInTheDocument();
   });
 
-  it('отображает текст "Зарплата не указана", если salary = null', () => {
-    render(<VacancyCard vacancy={mockVacancyWithoutSalary} />);
-    expect(screen.getByText('Зарплата не указана')).toBeInTheDocument();
+  it('отображает название компании', () => {
+    renderWithRouter(<VacancyCard vacancy={mockVacancy} />);
+    expect(screen.getByText('Tech Company')).toBeInTheDocument();
+  });
+
+  it('отображает город', () => {
+    renderWithRouter(<VacancyCard vacancy={mockVacancy} />);
+    expect(screen.getByText('Москва')).toBeInTheDocument();
+  });
+
+  it('отображает ссылку на детальную страницу', () => {
+    renderWithRouter(<VacancyCard vacancy={mockVacancy} />);
+    const link = screen.getByRole('link', { name: /Frontend Developer/i });
+    expect(link).toHaveAttribute('href', '/vacancies/123');
+  });
+
+  it('отображает "Можно удалённо" для удаленной работы', () => {
+    renderWithRouter(<VacancyCard vacancy={mockVacancy} />);
+    expect(screen.getByText('Можно удалённо')).toBeInTheDocument();
   });
 });

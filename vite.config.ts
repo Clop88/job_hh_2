@@ -3,5 +3,5 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  base: '/job_hh_1/',
+  base: '/job_hh_2/',
 });

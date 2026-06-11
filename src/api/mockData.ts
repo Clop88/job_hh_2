@@ -1,4 +1,3 @@
-import type { VacanciesResponse } from '../types/vacancy';
 
 export const mockVacanciesResponse: VacanciesResponse = {
   found: 25,

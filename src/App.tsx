@@ -12,7 +12,7 @@ function App() {
   return (
     <Provider store={store}>
       <MantineProvider theme={theme}>
-        <BrowserRouter basename="/job_hh">
+        <BrowserRouter basename="/job_hh_2">
           <Routes>
             <Route path="/" element={<Navigate to="/vacancies" replace />} />
             <Route path="/vacancies" element={<VacanciesPage />} />

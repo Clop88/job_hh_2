@@ -1,0 +1,155 @@
+.card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 20px 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e9ecef;
+  transition: all 0.2s ease;
+  width: 50vw;
+  max-width: 659px;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: #dee2e6;
+}
+
+.cardContent {
+  width: 100%;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.cardInfo {
+  flex: 1;
+}
+
+.vacancyTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1890ff;
+  margin: 0 0 10px 0;
+}
+
+.salaryRow {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.salary {
+  font-size: 16 px;
+  font-weight: 400;
+  color: #1a1a1a;
+}
+
+.experience {
+  font-size: 14px;
+  font-weight: 400;
+  color: #868e96;
+}
+
+.companyCityRow {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.company {
+  font-size: 14px;
+  font-weight: 400;
+  color: #495057;
+}
+
+.city {
+  font-size: 16px;
+  font-weight: 400;
+  color: #adb5bd;
+}
+
+.tagsRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  
+}
+
+.tag {
+  margin-top: 10px;
+  display: inline-block;
+  padding: 2px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.tagRemote {
+  background-color: #4263EB;
+  color: white;
+}
+
+.tagHybrid {
+  background-color: black;
+  color: white;
+}
+
+.tagOffice {
+  background-color: #0F0F101A;
+  color: #0F0F1080;
+}
+
+.cardActions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.watchBtn {
+  margin-top: 16px;
+  padding: 8px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  background-color: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: #0F0F10;
+}
+
+.watchBtn:hover {
+  background-color: #3307f7;
+}
+
+.respondBtn {
+  margin-top: 16px;
+  padding: 8px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #0F0F10;
+  background-color: #0F0F101A;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.respondBtn:hover {
+  background-color: #096dd9;
+}
+
+.vacancyLink {
+  text-decoration: none;
+  display: inline-block;
+}
+
+.vacancyLink:hover .vacancyTitle {
+  text-decoration: underline;
+}

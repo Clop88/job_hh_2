@@ -1,0 +1,16 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Open Sans' 'SemiBold';
+  background-color: #f5f7fa;
+  color: #1a1a1a;
+  line-height: 1.5;
+}
+
+button {
+  font-family: inherit;
+}

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getVacancyById } from '../api/hhApi';
+import type { KataJob } from '../api/hhApi';
 
 describe('hhApi', () => {
   beforeEach(() => {
@@ -7,48 +8,66 @@ describe('hhApi', () => {
   });
 
   describe('getVacancyById', () => {
-    const mockVacancyResponse = {
-      id: '123',
+    const mockVacancyResponse: KataJob = {
+      id: 1,
       name: 'Test Vacancy',
       description: 'Test description',
       about_company: 'Test about company',
+      company_name: 'Test Company',
+      city: 'Moscow',
+      salary: '100000',
+      space: 'office',
+      skills: 'React, TypeScript',
+      experience: '3-5 years',
+      short_description: 'Test short description',
+      published_at: '2024-01-01',
     };
 
-    it('должен успешно получать данные вакансии', async () => {
-      
-      globalThis.fetch = vi.fn().mockResolvedValue({
+    it('получает данные вакансии', async () => {
+      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
         ok: true,
-        json: async () => mockVacancyResponse,
-      });
+        json: async () => ({
+          success: true,
+          job: mockVacancyResponse,
+        }),
+      } as Response);
 
-      const result = await getVacancyById('123');
+      const result = await getVacancyById('1');
       
-      expect(globalThis.fetch).toHaveBeenCalledWith('https://kata-jobs.onrender.com/api/jobs/123');
+      expect(fetchSpy).toHaveBeenCalledWith('https://kata-jobs.onrender.com/api/jobs/1');
       expect(result).toEqual(mockVacancyResponse);
+      
+      fetchSpy.mockRestore();
     });
 
-    it('должен выбрасывать ошибку при статусе 404', async () => {
-      globalThis.fetch = vi.fn().mockResolvedValue({
+    it('выбрасывает ошибку при статусе 404', async () => {
+      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
         ok: false,
         status: 404,
-      });
+      } as Response);
 
       await expect(getVacancyById('999')).rejects.toThrow('HTTP error! status: 404');
+      
+      fetchSpy.mockRestore();
     });
 
-    it('должен выбрасывать ошибку при статусе 503', async () => {
-      globalThis.fetch = vi.fn().mockResolvedValue({
+    it('выбрасывает ошибку при статусе 503', async () => {
+      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
         ok: false,
         status: 503,
-      });
+      } as Response);
 
-      await expect(getVacancyById('123')).rejects.toThrow('HTTP error! status: 503');
+      await expect(getVacancyById('1')).rejects.toThrow('HTTP error! status: 503');
+      
+      fetchSpy.mockRestore();
     });
 
-    it('должен обрабатывать ошибку сети', async () => {
-      globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
+    it('обрабатывает ошибку сети', async () => {
+      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('Network error'));
 
-      await expect(getVacancyById('123')).rejects.toThrow('Network error');
+      await expect(getVacancyById('1')).rejects.toThrow('Network error');
+      
+      fetchSpy.mockRestore();
     });
   });
 });

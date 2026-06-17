@@ -1,18 +1,18 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { getVacancies, getVacancyById } from '../api/hhApi';
+import type { KataJob  } from '../api/hhApi';
 import type { RootState } from './index';
 
 interface VacanciesState {
-  vacancies: Vacancy[];
+  vacancies: KataJob[];
   loading: boolean;
   totalPages: number;
   currentPage: number;
   searchText: string;
   selectedCity: string | null;
   skills: string[];
-  isMockData: boolean;
-  selectedVacancy: VacancyDetailResponse | null;
+  selectedVacancy: KataJob | null;
   loadingDetail: boolean;
   detailError: string | null;
 }
@@ -25,7 +25,6 @@ const initialState: VacanciesState = {
   searchText: '',
   selectedCity: null,
   skills: ['TypeScript', 'React', 'Redux', 'Python'],
-  isMockData: false,
   selectedVacancy: null,
   loadingDetail: false,
   detailError: null,
@@ -38,15 +37,54 @@ export const fetchVacancies = createAsyncThunk(
     const state = getState() as { vacancies: VacanciesState };
     const { currentPage, searchText, selectedCity, skills } = state.vacancies;
     const response = await getVacancies(
-      currentPage - 1,
-      6,
-      searchText,
-      selectedCity || '',
-      skills
+      currentPage, 100);
+
+      let filteredJobs = response.jobs;
+      if (searchText) {
+        const lowerSearch = searchText.toLowerCase();
+        filteredJobs = filteredJobs.filter(
+          (job) =>
+            job.name.toLowerCase().includes(lowerSearch) ||
+            job.company_name.toLowerCase().includes(lowerSearch) ||
+            job.short_description.toLowerCase().includes(lowerSearch)
+        );
+      }
+
+      if (selectedCity) {
+        const cityMap: Record<string,string> = {
+          '1': 'Москва',
+          '2': 'Санкт-Петербург',
+          '3': 'Барнаул',
+          '4': 'Новосибирск',
+          '5': 'Екатеринбург',
+          '6': 'Казань',
+          '7': 'Нижний Новгород',
+          '8': 'Самара', 
+        };
+        const cityName = cityMap[selectedCity];
+        if (cityName) {
+          filteredJobs = filteredJobs.filter((job) => job.city === cityName);
+        }
+      }
+
+      if (skills.length > 0) {
+        filteredJobs = filteredJobs.filter((job) =>
+        skills.some((skill) =>
+        job.skills.toLowerCase().includes(skill.toLowerCase())
+      )
     );
-    return response;
   }
-    catch (error) {
+
+  const perPage = 6;
+  const start = (currentPage - 1) * perPage;
+  const paginatedJobs = filteredJobs.slice(start, start + perPage);
+  const totalPages = Math.ceil(filteredJobs.length / perPage);
+
+  return {
+    jobs: paginatedJobs,
+    totalPages: totalPages,
+    };
+  } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'Ошибка загрузки вакансий');
     }
   }
@@ -95,9 +133,8 @@ const vacanciesSlice = createSlice({
       })
       .addCase(fetchVacancies.fulfilled, (state, action) => {
         state.loading = false;
-        state.vacancies = action.payload.items;
-        state.totalPages = Math.min(action.payload.pages, 50);
-        state.isMockData = action.payload.isMock || false;
+        state.vacancies = action.payload.jobs;
+        state.totalPages = action.payload.totalPages;
       })
       .addCase(fetchVacancies.rejected, (state) => {
         state.loading = false;
@@ -122,7 +159,6 @@ const vacanciesSlice = createSlice({
   },
 });
 
-export const selectVacanciesState = (state: RootState) => state.vacancies;
 export const selectVacancies = (state: RootState) => state.vacancies.vacancies;
 export const selectLoading = (state: RootState) => state.vacancies.loading;
 export const selectTotalPages = (state: RootState) => state.vacancies.totalPages;
@@ -130,7 +166,6 @@ export const selectCurrentPage = (state: RootState) => state.vacancies.currentPa
 export const selectSearchText = (state: RootState) => state.vacancies.searchText;
 export const selectSelectedCity = (state: RootState) => state.vacancies.selectedCity;
 export const selectSkills = (state: RootState) => state.vacancies.skills;
-export const selectIsMockData = (state: RootState) => state.vacancies.isMockData;
 export const selectSelectedVacancy = (state: RootState) => state.vacancies.selectedVacancy;
 export const selectLoadingDetail = (state: RootState) => state.vacancies.loadingDetail;
 export const selectDetailError = (state: RootState) => state.vacancies.detailError;

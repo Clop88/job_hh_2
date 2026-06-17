@@ -1,6 +1,20 @@
+import { useNavigate } from 'react-router-dom';
+import { useAppDispatch } from '../store/hooks';
+import { setSearchText, setSelectedCity, setSkills, setCurrentPage } from '../store/vacanciesSlice';
 import styles from './Header.module.css';
 
 export const Header = () => {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+
+  const handleResetFilters = () => {
+    dispatch(setSearchText(''));
+    dispatch(setSelectedCity(null));
+    dispatch(setSkills([]));
+    dispatch(setCurrentPage(1));
+    navigate('/vacancies');
+  };
+
   return (
     <header className={styles.header}>
       <div className={styles.headerContainer}>
@@ -9,11 +23,10 @@ export const Header = () => {
           <span className={styles.logoText}>.FrontEnd</span>
         </div>
         <div className={styles.centerMenu}>
-          <a href="/" className={styles.menuItem}>Вакансии FE</a>
+          <span onClick={handleResetFilters} className={styles.menuItem}>
+            Вакансии FE
+          </span>
         </div>
-          
-        
-
         <div className={styles.rightMenu}>
           <span className={styles.dot}>•</span>
           <a href="/about" className={styles.userLink}>

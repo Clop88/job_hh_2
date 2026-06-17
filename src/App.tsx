@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
@@ -12,13 +12,13 @@ function App() {
   return (
     <Provider store={store}>
       <MantineProvider theme={theme}>
-        <BrowserRouter basename="/job_hh_2">
+        <HashRouter>
           <Routes>
             <Route path="/" element={<Navigate to="/vacancies" replace />} />
             <Route path="/vacancies" element={<VacanciesPage />} />
             <Route path="/vacancies/:id" element={<VacancyDetailPage />} />
           </Routes>
-        </BrowserRouter>
+        </HashRouter>
       </MantineProvider>
     </Provider>
   );

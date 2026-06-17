@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { Container } from '@mantine/core';
 import { 
@@ -15,7 +15,7 @@ import {
   selectSearchText,
   selectSelectedCity,
   selectSkills,
-  selectIsMockData,
+  
 } from '../store/vacanciesSlice';
 import { Header } from '../components/Header';
 import { SearchBar } from '../components/SearchBar';
@@ -27,7 +27,6 @@ import styles from './VacanciesPage.module.css';
 
 export const VacanciesPage = () => {
   const dispatch = useAppDispatch();
-  const [searchParams, setSearchParams] = useSearchParams();
   const isFirstRender = useRef(true);
   const vacancies = useAppSelector(selectVacancies);
   const loading = useAppSelector(selectLoading);
@@ -36,32 +35,38 @@ export const VacanciesPage = () => {
   const searchText = useAppSelector(selectSearchText);
   const selectedCity = useAppSelector(selectSelectedCity);
   const skills = useAppSelector(selectSkills);
-  const isMockData = useAppSelector(selectIsMockData);
+  
+  const location = useLocation();
+  const navigate = useNavigate();
 
   
   useEffect(() => {
-    const urlSearch = searchParams.get('search');
-    const urlCity = searchParams.get('city');
-    const urlSkills = searchParams.get('skills');
-    const urlPage = searchParams.get('page');
+    const params = new URLSearchParams(location.hash.replace('#', '?'));
+    const urlSearch = params.get('search');
+    const urlCity = params.get('city');
+    const urlSkills = params.get('skills');
+    const urlPage = params.get('page');
     
-    if (urlSearch !== null) {
-      dispatch(setSearchText(urlSearch));
-    }
+     if (urlSearch !== null) {
+    dispatch(setSearchText(urlSearch));
+  }
     
     if (urlCity !== null) {
-      dispatch(setSelectedCity(urlCity));
-    }
-    
+    dispatch(setSelectedCity(urlCity));
+  }
+        
     if (urlSkills !== null) {
-      const skillsArray = urlSkills.split(',');
-        dispatch(setSkills(skillsArray));
-    }
-    
+    const skillsArray = urlSkills.split(',');
+    dispatch(setSkills(skillsArray)); 
+  }
+        
     if (urlPage !== null) {
-      dispatch(setCurrentPage(parseInt(urlPage)));
+    const pageNumber = parseInt(urlPage, 10);
+    if (!isNaN(pageNumber) && pageNumber > 0) {
+      dispatch(setCurrentPage(pageNumber));
     }
-
+  }
+    
     isFirstRender.current = false;
     // eslint-disable-next-line
   }, []);
@@ -70,15 +75,15 @@ export const VacanciesPage = () => {
   useEffect(() => {
     if (isFirstRender.current) return;
 
-    const params: Record<string, string> = {};
+    const params = new URLSearchParams();
     
-    if (searchText) params.search = searchText;
-    if (selectedCity) params.city = selectedCity;
-    if (skills.length > 0) params.skills = skills.join(',');
-    if (currentPage > 1) params.page = currentPage.toString();
+    if (searchText) params.set ('search', searchText);
+    if (selectedCity) params.set ('city', selectedCity);
+    if (skills.length) params.set ('skills', skills.join(','));
+    if (currentPage > 1) params.set ('page', currentPage.toString());
     
-    setSearchParams(params, { replace: true });
-  }, [searchText, selectedCity, skills, currentPage, setSearchParams]);
+    navigate(`#/vacansies?${params.toString()}`, { replace: true });
+  }, [searchText, selectedCity, skills, currentPage, navigate]);
 
   
   useEffect(() => {
@@ -106,13 +111,6 @@ export const VacanciesPage = () => {
             <SearchBar value={searchText} onChange={handleSearchChange} />
           </div>
         </div>
-
-        {isMockData && (
-          <div className={styles.warningBanner}>
-            <span>⚠️</span>
-            <span>Сервис временно недоступен.</span>
-          </div>
-        )}
 
         <div className={styles.main}>
           <div className={styles.leftsection}>

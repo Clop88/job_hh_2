@@ -1,124 +1,48 @@
-import { mockVacanciesResponse } from './mockData';
 
-const API_URL = 'https://api.hh.ru/vacancies';
 const KATA_API_URL = 'https://kata-jobs.onrender.com/api/jobs';
 
-interface FetchParams {
-  [key: string]: string;
+interface KataJobsResponse {
+  success: boolean;
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+  jobs: KataJob[];
 }
 
-export const getVacancies = async (
-  page: number = 0,
-  perPage: number = 6,
-  text: string = '',
-  area: string = '',
-  skills: string[] = []
-): Promise<VacanciesResponse & { isMock?: boolean }> => {
-  const params: FetchParams = {
-    page: page.toString(),
-    per_page: perPage.toString(),
-    industry: '7',
-    professional_role: '96',
-  };
+export interface KataJob {
+  id: number;
+  company_name: string;
+  name: string;
+  city: string;
+  salary: string;
+  published_at: string;
+  short_description: string;
+  space: string;
+  skills: string;
+  experience: string;
+  description?: string; 
+  about_company?: string; 
+}
 
-  if (text) {
-    params.text = text;
-    params.search_field = 'name,company';
-  }
-
-  if (area) {
-    params.area = area;
-  }
-
-  if (skills.length > 0) {
-    const skillsText = skills.join(' AND ');
-    if (params.text) {
-      params.text = `${params.text} ${skillsText}`;
-    } else {
-      params.text = skillsText;
-    }
-  }
-
-  try {
-    const queryString = new URLSearchParams(params).toString();
-    const response = await fetch(`${API_URL}?${queryString}`);
-
-    if (response.status === 403) {
-      console.warn('API вернул 403 Forbidden. Используем моковые данные.');
-      const filteredData = filterMockData(page, perPage, text, area, skills);
-      return { ...filteredData, isMock: true };
-    }
-
+export const getVacancies = async (page: number = 1, limit: number = 100) => {
+  const response = await fetch(`${KATA_API_URL}?page=${page}&limit=${limit}`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-
-    const data = await response.json();
-    return { ...data, isMock: false };
-  } catch (error) {
-    console.error('Ошибка при запросе к API:', error);
-    const filteredData = filterMockData(page, perPage, text, area, skills);
-    return { ...filteredData, isMock: true };
-  }
-};
-
-const filterMockData = (
-  page: number,
-  perPage: number,
-  text: string,
-  area: string,
-  skills: string[]
-): VacanciesResponse => {
-  let filtered = [...mockVacanciesResponse.items];
-
-  if (text) {
-    const lowerText = text.toLowerCase();
-    filtered = filtered.filter(
-      (item: Vacancy) =>
-        item.name.toLowerCase().includes(lowerText) ||
-        item.employer.name.toLowerCase().includes(lowerText) ||
-        item.snippet.requirement.toLowerCase().includes(lowerText)
-    );
-  }
-
-  if (area) {
-    const areaMap: { [key: string]: string } = {
-      '1': 'Москва',
-      '2': 'Санкт-Петербург',
-      '3': 'Барнаул',
+    const data: KataJobsResponse = await response.json();
+    
+    return {
+      jobs: data.jobs,
+      totalPages: data.pagination.totalPages,
     };
-    const cityName = areaMap[area];
-    if (cityName) {
-      filtered = filtered.filter((item: Vacancy) => item.area.name === cityName);
-    }
-  }
-
-  if (skills.length > 0) {
-    filtered = filtered.filter((item: Vacancy) =>
-      skills.some((skill: string) =>
-        item.key_skills.some((ks: { name: string }) => 
-          ks.name.toLowerCase() === skill.toLowerCase()
-      )
-     )
-    );
-  }
-
-  const total = filtered.length;
-  const start = page * perPage;
-  const end = start + perPage;
-  const paginatedItems = filtered.slice(start, end);
-
-  return {
-    ...mockVacanciesResponse,
-    found: total,
-    pages: Math.ceil(total / perPage),
-    page: page,
-    per_page: perPage,
-    items: paginatedItems,
   };
-};
 
-export const getVacancyById = async (id: string): Promise<VacancyDetailResponse> => {
+export const getVacancyById = async (id: string): Promise<KataJob> => {
   const response = await fetch(`${KATA_API_URL}/${id}`);
   
   if (!response.ok) {
@@ -131,5 +55,6 @@ export const getVacancyById = async (id: string): Promise<VacancyDetailResponse>
     throw new Error(data.error);
   }
   
-  return data;
+  return data.job;
 };
+

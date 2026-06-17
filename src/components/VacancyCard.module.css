@@ -117,6 +117,7 @@
   color: white;
   background-color: transparent;
   border: none;
+  text-decoration: none;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s ease;

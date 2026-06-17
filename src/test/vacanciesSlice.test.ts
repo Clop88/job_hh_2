@@ -10,9 +10,10 @@ import vacanciesReducer, {
   selectCurrentPage,
   selectSearchText,
 } from '../store/vacanciesSlice';
+import type { KataJob } from '../api/hhApi';
 
 
-vi.mock('../../api/hhApi', () => ({
+vi.mock('../api/hhApi', () => ({
   getVacancies: vi.fn(),
   getVacancyById: vi.fn(),
 }));
@@ -20,49 +21,63 @@ vi.mock('../../api/hhApi', () => ({
 describe('vacanciesSlice', () => {
   describe('редьюсеры', () => {
     const initialState = {
-      vacancies: [] as Vacancy[],  // ← тип Vacancy глобальный
+      vacancies: [] as KataJob[],
       loading: false,
       totalPages: 0,
       currentPage: 1,
       searchText: '',
       selectedCity: null as string | null,
       skills: [] as string[],
-      isMockData: false,
-      selectedVacancy: null as VacancyDetailResponse | null,  // ← тип глобальный
+      selectedVacancy: null as KataJob | null,
       loadingDetail: false,
       detailError: null as string | null,
     };
 
-    it('должен обрабатывать setCurrentPage', () => {
+    it('обрабатывает setCurrentPage', () => {
       const nextState = vacanciesReducer(initialState, setCurrentPage(3));
       expect(nextState.currentPage).toBe(3);
     });
 
-    it('должен обрабатывать setSearchText и сбрасывать страницу', () => {
+    it('обрабатывает setSearchText и сбрасывать страницу', () => {
       const stateWithPage = { ...initialState, currentPage: 5 };
       const nextState = vacanciesReducer(stateWithPage, setSearchText('React'));
       expect(nextState.searchText).toBe('React');
       expect(nextState.currentPage).toBe(1);
     });
 
-    it('должен обрабатывать setSelectedCity и сбрасывать страницу', () => {
+    it('обрабатывает setSelectedCity и сбрасывать страницу', () => {
       const stateWithPage = { ...initialState, currentPage: 3 };
       const nextState = vacanciesReducer(stateWithPage, setSelectedCity('1'));
       expect(nextState.selectedCity).toBe('1');
       expect(nextState.currentPage).toBe(1);
     });
 
-    it('должен обрабатывать setSkills и сбрасывать страницу', () => {
+    it('обрабатывает setSkills и сбрасывать страницу', () => {
       const stateWithPage = { ...initialState, currentPage: 2 };
       const nextState = vacanciesReducer(stateWithPage, setSkills(['React', 'TypeScript']));
       expect(nextState.skills).toEqual(['React', 'TypeScript']);
       expect(nextState.currentPage).toBe(1);
     });
 
-    it('должен обрабатывать clearSelectedVacancy', () => {
+    it('обрабатывает clearSelectedVacancy', () => {
+      const mockJob: KataJob = {
+        id: 1,
+        company_name: 'Test Company',
+        name: 'Test Job',
+        city: 'Moscow',
+        salary: '100000',
+        space: 'office',
+        skills: 'React',
+        experience: '3-5 years',
+        short_description: 'Test',
+        published_at: '2024-01-01',
+        description: 'Description',
+        about_company: 'About',
+      };
+      
       const stateWithVacancy = { 
         ...initialState, 
-        selectedVacancy: { id: '123' } as VacancyDetailResponse,
+        selectedVacancy: mockJob,
         detailError: 'Some error',
       };
       
@@ -73,18 +88,17 @@ describe('vacanciesSlice', () => {
   });
 
   describe('селекторы', () => {
-    const mockVacancy: Vacancy = {
-      id: '1',
-      name: 'Test Vacancy',
-      salary: null,
-      experience: { id: '1', name: '1-3 года' },
-      employment: { id: '1', name: 'Полная занятость' },
-      schedule: null,
-      employer: { id: '1', name: 'Test Company', url: null },
-      area: { id: '1', name: 'Москва' },
-      alternate_url: 'https://test.com',
-      snippet: { requirement: 'Test', responsibility: 'Test' },
-      key_skills: [],
+    const mockJob: KataJob = {
+      id: 1,
+      company_name: 'Test Company',
+      name: 'Test Job',
+      city: 'Moscow',
+      salary: '100000',
+      space: 'office',
+      skills: 'React, TypeScript',
+      experience: '3-5 years',
+      short_description: 'Test description',
+      published_at: '2024-01-01',
     };
 
     const store = configureStore({
@@ -93,14 +107,13 @@ describe('vacanciesSlice', () => {
       },
       preloadedState: {
         vacancies: {
-          vacancies: [mockVacancy],
+          vacancies: [mockJob],
           loading: false,
           totalPages: 10,
           currentPage: 2,
           searchText: 'React',
           selectedCity: '1',
           skills: ['TypeScript'],
-          isMockData: false,
           selectedVacancy: null,
           loadingDetail: false,
           detailError: null,
@@ -108,17 +121,17 @@ describe('vacanciesSlice', () => {
       },
     });
 
-    it('selectVacancies должен возвращать список вакансий', () => {
+    it('selectVacancies возвращает список вакансий', () => {
       const state = store.getState();
-      expect(selectVacancies(state)).toEqual([mockVacancy]);
+      expect(selectVacancies(state)).toEqual([mockJob]);
     });
 
-    it('selectCurrentPage должен возвращать текущую страницу', () => {
+    it('selectCurrentPage возвращает текущую страницу', () => {
       const state = store.getState();
       expect(selectCurrentPage(state)).toBe(2);
     });
 
-    it('selectSearchText должен возвращать текст поиска', () => {
+    it('selectSearchText возвращает текст поиска', () => {
       const state = store.getState();
       expect(selectSearchText(state)).toBe('React');
     });
